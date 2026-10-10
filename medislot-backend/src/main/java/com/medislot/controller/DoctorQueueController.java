@@ -41,6 +41,6 @@ public class DoctorQueueController {
 
     @PostMapping("/{id}/complete")
     public ApiResponse<StaffAppointment> complete(@AuthenticationPrincipal AuthUser actor, @PathVariable Long id) {
-        return ApiResponse.ok("Consultation completed.", queue.complete(actor, id));
+        throw new com.medislot.exception.ApiException(org.springframework.http.HttpStatus.GONE, "USE_CONSULTATION_COMPLETE", "Complete the consultation from the consultation screen, with notes.");
     }
 }

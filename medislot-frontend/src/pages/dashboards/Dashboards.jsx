@@ -7,7 +7,7 @@ export function PatientDashboard() {
       items={[
         { label: "Find a hospital", note: "Search near you or by name", to: "/hospitals" },
         { label: "Find a doctor", note: "By specialization, name or location", to: "/doctors" },
-        { label: "My appointments", note: "Upcoming and past visits", to: "/patient/appointments" },
+        { label: "My appointments", note: "Upcoming and past visits, QR codes", to: "/patient/appointments" },
         { label: "Prescriptions", note: "Coming in Phase 7" },
       ]}
     />
@@ -19,9 +19,9 @@ export function DoctorDashboard() {
     <DashboardShell
       title="Doctor dashboard"
       items={[
+        { label: "Today's queue", note: "Call, start and complete consultations", to: "/doctor/queue" },
         { label: "Availability and leave", note: "Working hours and days off", to: "/doctor/schedule" },
-        { label: "Today's queue", note: "Coming in Phase 6" },
-        { label: "Consultations", note: "Coming in Phase 7" },
+        { label: "Consultation notes and prescriptions", note: "Coming in Phase 7" },
       ]}
     />
   );
@@ -32,9 +32,11 @@ export function ReceptionDashboard() {
     <DashboardShell
       title="Reception dashboard"
       items={[
-        { label: "QR check-in", note: "Coming in Phase 6" },
-        { label: "Queue management", note: "Coming in Phase 6" },
-        { label: "Walk-ins", note: "Coming in Phase 6" },
+        { label: "Overview", note: "Today at a glance", to: "/reception/overview" },
+        { label: "QR check-in", note: "Scan or enter a patient's code", to: "/reception/check-in" },
+        { label: "Queue board", note: "Who is waiting for which doctor", to: "/reception/queue" },
+        { label: "Walk-ins", note: "Register a patient at the desk", to: "/reception/walk-in" },
+        { label: "Appointments", note: "Search, check in, cancel or no-show", to: "/reception/appointments" },
       ]}
     />
   );

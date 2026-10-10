@@ -5,6 +5,7 @@ import { cancelAppointment, getAppointment } from "../../api/appointments";
 import { getApiError } from "../../api/errors";
 import StatusBadge from "../../components/StatusBadge";
 import CancelDialog from "../../components/CancelDialog";
+import QueuePanel from "../../components/QueuePanel";
 import { directionsUrl, hasCoordinates, viewLocationUrl } from "../../utils/maps";
 import { formatLong } from "../../utils/dates";
 import { ACTIVE_STATUSES, to12h } from "../../utils/format";
@@ -48,6 +49,7 @@ export default function AppointmentDetails() {
   const h = appt.hospital;
   const active = ACTIVE_STATUSES.includes(appt.status);
   const changeable = appt.status === "CONFIRMED" || appt.status === "ATTENDANCE_PENDING";
+  const inQueue = ["CHECKED_IN", "WAITING", "IN_CONSULTATION"].includes(appt.status);
   const banner = location.state?.justBooked
     ? "Appointment Confirmed"
     : location.state?.justRescheduled ? "Appointment Rescheduled" : null;
@@ -104,11 +106,15 @@ export default function AppointmentDetails() {
           <p className="mt-1 text-xs text-slate-500">Rescheduled {appt.rescheduleCount} time(s).</p>
         )}
 
+        {inQueue && <QueuePanel appointmentId={appt.appointmentId} />}
+
         <div className="mt-6 flex flex-wrap gap-3">
-          <button type="button" disabled title="QR check-in arrives in Phase 6"
-                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-400">
-            View QR Code
-          </button>
+          {changeable && (
+            <Link to={`/appointments/${appt.appointmentId}/qr`}
+                  className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-900">
+              View QR Code
+            </Link>
+          )}
           {hasCoordinates(h) && (
             <a href={viewLocationUrl(h)} target="_blank" rel="noopener noreferrer"
                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">

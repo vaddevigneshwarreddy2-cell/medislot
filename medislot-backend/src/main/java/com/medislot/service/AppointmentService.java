@@ -234,6 +234,37 @@ public class AppointmentService {
         return n.getId();
     }
 
+    // ================= walk-in (staff) =================
+
+    /** Books a slot for a patient who is standing at the desk. Same unique index, same rules except the max-active limit. */
+    public Long createWalkIn(AuthUser actor, Long hospitalId, Long patientId, Long doctorId,
+                             LocalDate date, String time, String reason) {
+        Resolved slot = resolve(doctorId, date, time);
+        if (!slot.doctor().getHospitalId().equals(hospitalId)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "DOCTOR_NOT_FOUND", "Doctor not found.");
+        }
+        try {
+            return tx.execute(st -> {
+                Instant now = Instant.now();
+                lockPatient(patientId);
+                releaseStaleHolds(slot, now);
+                appts.flush();
+                enforceRules(patientId, doctorId, date, slot.start(), slot.end(), 0L, false);
+                Appointment a = newAppointment(patientId, slot);
+                a.setStatus(CONFIRMED);
+                a.setSource("WALK_IN");
+                a.setReason(blankToNull(reason));
+                a = appts.saveAndFlush(a);
+                machine.recordInitial(a, actor.id(), "Walk-in created by staff");
+                audit.log(actor.id(), actor.email(), "WALK_IN_CREATED", "APPOINTMENT",
+                        String.valueOf(a.getId()), "doctorId=" + doctorId, null);
+                return a.getId();
+            });
+        } catch (DataIntegrityViolationException e) {
+            throw slotUnavailable();
+        }
+    }
+
     // ================= reads =================
 
     @Transactional(readOnly = true)

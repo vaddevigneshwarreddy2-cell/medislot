@@ -62,6 +62,32 @@ public class Appointment extends BaseEntity {
     @Column(name = "cancel_reason", length = 255)
     private String cancelReason;
 
+    @Column(name = "queue_number")
+    private Integer queueNumber;
+
+    @Column(name = "checked_in_at")
+    private Instant checkedInAt;
+
+    @Column(name = "called_at")
+    private Instant calledAt;
+
+    @Column(name = "consultation_started_at")
+    private Instant consultationStartedAt;
+
+    @Column(name = "completed_at")
+    private Instant completedAt;
+
+    public Integer getQueueNumber() { return queueNumber; }
+    public void setQueueNumber(Integer queueNumber) { this.queueNumber = queueNumber; }
+    public Instant getCheckedInAt() { return checkedInAt; }
+    public void setCheckedInAt(Instant checkedInAt) { this.checkedInAt = checkedInAt; }
+    public Instant getCalledAt() { return calledAt; }
+    public void setCalledAt(Instant calledAt) { this.calledAt = calledAt; }
+    public Instant getConsultationStartedAt() { return consultationStartedAt; }
+    public void setConsultationStartedAt(Instant consultationStartedAt) { this.consultationStartedAt = consultationStartedAt; }
+    public Instant getCompletedAt() { return completedAt; }
+    public void setCompletedAt(Instant completedAt) { this.completedAt = completedAt; }
+
     public Long getId() { return id; }
     public Long getPatientId() { return patientId; }
     public void setPatientId(Long patientId) { this.patientId = patientId; }

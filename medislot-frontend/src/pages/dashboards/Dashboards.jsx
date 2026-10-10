@@ -1,0 +1,56 @@
+import DashboardShell from "./DashboardShell";
+
+export function PatientDashboard() {
+  return (
+    <DashboardShell
+      title="Patient dashboard"
+      items={[
+        { label: "Find a hospital", note: "Search near you or by name", to: "/hospitals" },
+        { label: "Find a doctor", note: "By specialization, name or location", to: "/doctors" },
+        { label: "My appointments", note: "Coming in Phase 5" },
+        { label: "Prescriptions", note: "Coming in Phase 7" },
+      ]}
+    />
+  );
+}
+
+export function DoctorDashboard() {
+  return (
+    <DashboardShell
+      title="Doctor dashboard"
+      items={[
+        { label: "Availability and leave", note: "Working hours and days off", to: "/doctor/schedule" },
+        { label: "Today's queue", note: "Coming in Phase 6" },
+        { label: "Consultations", note: "Coming in Phase 7" },
+      ]}
+    />
+  );
+}
+
+export function ReceptionDashboard() {
+  return (
+    <DashboardShell
+      title="Reception dashboard"
+      items={[
+        { label: "QR check-in", note: "Coming in Phase 6" },
+        { label: "Queue management", note: "Coming in Phase 6" },
+        { label: "Walk-ins", note: "Coming in Phase 6" },
+      ]}
+    />
+  );
+}
+
+export function AdminDashboard() {
+  return (
+    <DashboardShell
+      title="Hospital admin dashboard"
+      items={[
+        { label: "Doctors", note: "Add doctors, set schedules and leave", to: "/admin/doctors" },
+        { label: "Departments", note: "Manage departments", to: "/admin/departments" },
+        { label: "Holidays", note: "Days the hospital is closed", to: "/admin/holidays" },
+        { label: "Hospital profile and location", note: "Admin screen coming later" },
+        { label: "Reports", note: "Coming in Phase 9" },
+      ]}
+    />
+  );
+}

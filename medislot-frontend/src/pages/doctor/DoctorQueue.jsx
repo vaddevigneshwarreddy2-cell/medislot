@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import StatusBadge from "../../components/StatusBadge";
 import usePolling from "../../hooks/usePolling";
-import { callNext, callPatient, completeConsultation, doctorQueue, startConsultation } from "../../api/staff";
+import { callNext, callPatient, doctorQueue, startConsultation } from "../../api/staff";
 import { getApiError } from "../../api/errors";
 import { to12h } from "../../utils/format";
 
 export default function DoctorQueue() {
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [msg, setMsg] = useState(null);
@@ -28,6 +29,19 @@ export default function DoctorQueue() {
     } catch (err) {
       setError(getApiError(err).message);
     } finally {
+      setBusy(false);
+    }
+  }
+
+  async function start(id) {
+    setBusy(true);
+    setError(null);
+    setMsg(null);
+    try {
+      await startConsultation(id);
+      navigate(`/doctor/consultations/${id}`);
+    } catch (err) {
+      setError(getApiError(err).message);
       setBusy(false);
     }
   }
@@ -68,13 +82,11 @@ export default function DoctorQueue() {
               <p className="text-sm text-slate-600">Slot {to12h(e.appointmentTime)}</p>
               {e.reason && <p className="mt-1 text-sm text-slate-700">Reason: {e.reason}</p>}
             </div>
-            <button type="button" disabled={busy}
-                    onClick={() => { if (window.confirm("Complete this consultation?")) act(() => completeConsultation(e.appointmentId), "Consultation completed."); }}
-                    className={`${btn} bg-indigo-600 text-white hover:bg-indigo-700`}>
-              Complete consultation
-            </button>
+            <Link to={`/doctor/consultations/${e.appointmentId}`}
+                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+              Open consultation
+            </Link>
           </div>
-          <p className="mt-2 text-xs text-slate-500">Notes, prescription and follow-up arrive in the next phase.</p>
         </div>
       ))}
 
@@ -100,8 +112,8 @@ export default function DoctorQueue() {
                   <button type="button" disabled={busy} onClick={() => act(() => callPatient(e.appointmentId), "Patient called.")}
                           className={`${btn} border border-slate-300 hover:bg-slate-100`}>Call</button>)}
                 <button type="button" disabled={busy || now.length > 0} title={now.length > 0 ? "Finish the current consultation first" : ""}
-                        onClick={() => act(() => startConsultation(e.appointmentId), "Consultation started.")}
-                        className={`${btn} bg-brand-600 text-white hover:bg-brand-700`}>Start</button>
+                        onClick={() => start(e.appointmentId)}
+                        className={`${btn} bg-brand-600 text-white hover:bg-brand-700`}>Start consultation</button>
               </div>
             </li>
           ))}

@@ -8,7 +8,8 @@ export function PatientDashboard() {
         { label: "Find a hospital", note: "Search near you or by name", to: "/hospitals" },
         { label: "Find a doctor", note: "By specialization, name or location", to: "/doctors" },
         { label: "My appointments", note: "Upcoming and past visits, QR codes", to: "/patient/appointments" },
-        { label: "Prescriptions", note: "Coming in Phase 7" },
+        { label: "Prescriptions", note: "View and download after a visit", to: "/patient/prescriptions" },
+        { label: "Follow-ups", note: "Return visits your doctor suggested", to: "/patient/follow-ups" },
       ]}
     />
   );
@@ -20,8 +21,8 @@ export function DoctorDashboard() {
       title="Doctor dashboard"
       items={[
         { label: "Today's queue", note: "Call, start and complete consultations", to: "/doctor/queue" },
+        { label: "Prescriptions issued", note: "Completed consultations", to: "/doctor/prescriptions" },
         { label: "Availability and leave", note: "Working hours and days off", to: "/doctor/schedule" },
-        { label: "Consultation notes and prescriptions", note: "Coming in Phase 7" },
       ]}
     />
   );

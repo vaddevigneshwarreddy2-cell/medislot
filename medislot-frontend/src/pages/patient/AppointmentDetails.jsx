@@ -108,6 +108,19 @@ export default function AppointmentDetails() {
 
         {inQueue && <QueuePanel appointmentId={appt.appointmentId} />}
 
+        {appt.status === "COMPLETED" && (
+          <div className="mt-6 rounded-lg bg-slate-50 px-4 py-3 text-sm text-slate-700">
+            Your visit is complete.{" "}
+            <Link to="/patient/prescriptions" className="font-medium text-brand-600 hover:underline">
+              View your prescriptions
+            </Link>{" "}
+            or{" "}
+            <Link to="/patient/follow-ups" className="font-medium text-brand-600 hover:underline">
+              follow-ups
+            </Link>.
+          </div>
+        )}
+
         <div className="mt-6 flex flex-wrap gap-3">
           {changeable && (
             <Link to={`/appointments/${appt.appointmentId}/qr`}

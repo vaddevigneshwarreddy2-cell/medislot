@@ -14,6 +14,7 @@ import DoctorSearch from "./pages/DoctorSearch";
 import DoctorDetails from "./pages/DoctorDetails";
 import DoctorSchedule from "./pages/dashboards/DoctorSchedule";
 import DoctorQueue from "./pages/doctor/DoctorQueue";
+import Consultation from "./pages/doctor/Consultation";
 import AdminDoctors from "./pages/admin/AdminDoctors";
 import AdminDoctorSchedule from "./pages/admin/AdminDoctorSchedule";
 import AdminDepartments from "./pages/admin/AdminDepartments";
@@ -23,6 +24,9 @@ import AppointmentDetails from "./pages/patient/AppointmentDetails";
 import AppointmentQr from "./pages/patient/AppointmentQr";
 import BookingConfirm from "./pages/patient/BookingConfirm";
 import Reschedule from "./pages/patient/Reschedule";
+import FollowUps from "./pages/patient/FollowUps";
+import PrescriptionList from "./pages/clinical/PrescriptionList";
+import PrescriptionDetailPage from "./pages/clinical/PrescriptionDetailPage";
 import ReceptionHome from "./pages/reception/ReceptionHome";
 import CheckIn from "./pages/reception/CheckIn";
 import ReceptionQueue from "./pages/reception/Queue";
@@ -60,6 +64,9 @@ export default function App() {
 
           <Route path="/patient" element={guard(PATIENT_ONLY, <PatientDashboard />)} />
           <Route path="/patient/appointments" element={guard(PATIENT_ONLY, <MyAppointments />)} />
+          <Route path="/patient/prescriptions" element={guard(PATIENT_ONLY, <PrescriptionList role="PATIENT" />)} />
+          <Route path="/patient/prescriptions/:prescriptionId" element={guard(PATIENT_ONLY, <PrescriptionDetailPage role="PATIENT" />)} />
+          <Route path="/patient/follow-ups" element={guard(PATIENT_ONLY, <FollowUps />)} />
           <Route path="/appointments/:appointmentId" element={guard(PATIENT_ONLY, <AppointmentDetails />)} />
           <Route path="/appointments/:appointmentId/qr" element={guard(PATIENT_ONLY, <AppointmentQr />)} />
           <Route path="/appointments/:appointmentId/confirm" element={guard(PATIENT_ONLY, <BookingConfirm />)} />
@@ -67,6 +74,9 @@ export default function App() {
 
           <Route path="/doctor" element={guard(DOCTOR_ONLY, <DoctorDashboard />)} />
           <Route path="/doctor/queue" element={guard(DOCTOR_ONLY, <DoctorQueue />)} />
+          <Route path="/doctor/consultations/:appointmentId" element={guard(DOCTOR_ONLY, <Consultation />)} />
+          <Route path="/doctor/prescriptions" element={guard(DOCTOR_ONLY, <PrescriptionList role="DOCTOR" />)} />
+          <Route path="/doctor/prescriptions/:prescriptionId" element={guard(DOCTOR_ONLY, <PrescriptionDetailPage role="DOCTOR" />)} />
           <Route path="/doctor/schedule" element={guard(DOCTOR_ONLY, <DoctorSchedule />)} />
 
           <Route path="/reception" element={guard(RECEPTION_ONLY, <ReceptionHome />)} />

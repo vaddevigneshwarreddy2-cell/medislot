@@ -40,14 +40,12 @@ export default function HospitalCard({ hospital, origin }) {
         >
           View Hospital
         </Link>
-        <button
-          type="button"
-          disabled
-          title="Booking opens in Phase 5"
-          className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-400"
+        <Link
+          to={`/doctors?hospitalId=${h.id}`}
+          className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
         >
           Book Appointment
-        </button>
+        </Link>
         {hasCoordinates(h) && (
           <a
             href={viewLocationUrl(h)}

@@ -32,5 +32,5 @@ public final class AppointmentDtos {
                                   String appointmentTime, String endTime, Instant holdExpiresAt,
                                   String doctorName, String specialization, String department,
                                   HospitalInfo hospital, int rescheduleCount, Long rescheduledFromId,
-                                  String reason, boolean canCancel, boolean canReschedule) {}
+                                  String reason, boolean canCancel, boolean canReschedule, Long doctorId) {}
 }

@@ -7,7 +7,7 @@ export function PatientDashboard() {
       items={[
         { label: "Find a hospital", note: "Search near you or by name", to: "/hospitals" },
         { label: "Find a doctor", note: "By specialization, name or location", to: "/doctors" },
-        { label: "My appointments", note: "Coming in Phase 5" },
+        { label: "My appointments", note: "Upcoming and past visits", to: "/patient/appointments" },
         { label: "Prescriptions", note: "Coming in Phase 7" },
       ]}
     />

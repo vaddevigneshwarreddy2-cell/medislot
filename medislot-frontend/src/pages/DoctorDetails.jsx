@@ -1,32 +1,33 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { isCancel } from "axios";
-import { getAvailability, getDoctor, getUpcoming } from "../api/doctors";
+import { getDoctor } from "../api/doctors";
+import { holdSlot } from "../api/appointments";
 import { getApiError } from "../api/errors";
-import { DAYS, REASONS, formatLong, parseDate } from "../utils/dates";
+import { useAuth } from "../auth/AuthContext";
+import SlotPicker from "../components/SlotPicker";
+import { DAYS, formatLong } from "../utils/dates";
+import { to12h } from "../utils/format";
 
 export default function DoctorDetails() {
   const { doctorId } = useParams();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [doctor, setDoctor] = useState(null);
-  const [days, setDays] = useState([]);
-  const [date, setDate] = useState(null);
-  const [day, setDay] = useState(null);
-  const [selected, setSelected] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [dayLoading, setDayLoading] = useState(false);
+  const [selected, setSelected] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [booking, setBooking] = useState(false);
+  const [bookError, setBookError] = useState(null);
 
   useEffect(() => {
     const c = new AbortController();
     setLoading(true);
-    Promise.all([getDoctor(doctorId, c.signal), getUpcoming(doctorId, 14, c.signal)])
-      .then(([d, up]) => {
-        setDoctor(d);
-        setDays(up);
-        const first = up.find((x) => x.slotCount > 0) || up[0];
-        setDate(first ? first.date : null);
-        setLoading(false);
-      })
+    getDoctor(doctorId, c.signal)
+      .then((d) => { setDoctor(d); setLoading(false); })
       .catch((err) => {
         if (isCancel(err)) return;
         setError(getApiError(err).message);
@@ -35,20 +36,28 @@ export default function DoctorDetails() {
     return () => c.abort();
   }, [doctorId]);
 
-  useEffect(() => {
-    if (!date) return;
-    const c = new AbortController();
-    setDayLoading(true);
-    setSelected(null);
-    getAvailability(doctorId, date, c.signal)
-      .then((a) => { setDay(a); setDayLoading(false); })
-      .catch((err) => {
-        if (isCancel(err)) return;
-        setError(getApiError(err).message);
-        setDayLoading(false);
-      });
-    return () => c.abort();
-  }, [doctorId, date]);
+  async function book() {
+    if (!selected) return;
+    if (!user) {
+      navigate("/login", { state: { from: location, message: "Log in to book an appointment." } });
+      return;
+    }
+    setBooking(true);
+    setBookError(null);
+    try {
+      const a = await holdSlot(doctorId, selected.date, selected.time);
+      navigate(`/appointments/${a.appointmentId}/confirm`);
+    } catch (err) {
+      const { code, message } = getApiError(err);
+      setBookError(message);
+      if (code === "SLOT_UNAVAILABLE") {
+        setSelected(null);
+        setRefreshKey((k) => k + 1); // reload the slots so the taken one disappears
+      }
+    } finally {
+      setBooking(false);
+    }
+  }
 
   if (loading) return <p className="p-8 text-center text-slate-500">Loading...</p>;
   if (error || !doctor) {
@@ -61,6 +70,7 @@ export default function DoctorDetails() {
   }
 
   const d = doctor;
+  const canBook = !user || user.role === "PATIENT";
   const byDay = {};
   d.schedule.forEach((w) => { (byDay[w.dayOfWeek] ||= []).push(`${w.start}-${w.end}`); });
 
@@ -80,52 +90,30 @@ export default function DoctorDetails() {
         <p className="text-sm text-slate-600">Department: {d.departmentName} | Appointment length: {d.consultationDurationMin} min</p>
         {d.bio && <p className="mt-3 text-sm text-slate-600">{d.bio}</p>}
 
-        <h2 className="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">Choose a date</h2>
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-2" role="group" aria-label="Choose a date">
-          {days.map((x) => {
-            const dt = parseDate(x.date);
-            const active = x.date === date;
-            return (
-              <button key={x.date} type="button" onClick={() => setDate(x.date)} aria-pressed={active}
-                      className={`min-w-[4.5rem] rounded-lg border px-3 py-2 text-center text-sm ${
-                        active ? "border-brand-600 bg-brand-600 text-white"
-                               : x.slotCount > 0 ? "border-slate-300 bg-white hover:bg-slate-100"
-                                                 : "border-slate-200 bg-slate-50 text-slate-400"}`}>
-                <span className="block text-xs">{dt.toLocaleDateString(undefined, { weekday: "short" })}</span>
-                <span className="block text-lg font-semibold">{dt.getDate()}</span>
-                <span className="block text-xs">{x.slotCount > 0 ? `${x.slotCount} slots` : "none"}</span>
-              </button>
-            );
-          })}
+        <h2 className="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">Choose a date and time</h2>
+        <div className="mt-3">
+          <SlotPicker doctorId={doctorId} selected={selected} onSelect={setSelected} refreshKey={refreshKey} />
         </div>
 
-        <div className="mt-6" aria-live="polite">
-          {date && <h3 className="font-semibold text-slate-800">{formatLong(date)}</h3>}
-          {dayLoading && <p className="mt-2 text-slate-500">Loading slots...</p>}
-          {!dayLoading && day && day.slots.length === 0 && (
-            <p className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
-              {REASONS[day.unavailableReason] || "No slots available."} Pick another date.
-            </p>
-          )}
-          {!dayLoading && day && day.slots.length > 0 && (
-            <ul className="mt-3 flex flex-wrap gap-2">
-              {day.slots.map((s) => (
-                <li key={s.start}>
-                  <button type="button" onClick={() => setSelected(s.start)} aria-pressed={selected === s.start}
-                          className={`rounded-lg border px-3 py-1.5 text-sm font-medium ${
-                            selected === s.start ? "border-brand-600 bg-brand-600 text-white"
-                                                 : "border-slate-300 bg-white hover:bg-slate-100"}`}>
-                    {s.start}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        {bookError && (
+          <p role="alert" className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{bookError}</p>
+        )}
 
-        <button type="button" disabled title="Booking opens in Phase 5"
-                className="mt-6 rounded-lg border border-slate-300 px-5 py-2 font-medium text-slate-400">
-          Book Appointment
+        {selected && (
+          <p className="mt-4 text-sm text-slate-700">
+            Selected: <span className="font-semibold">{formatLong(selected.date)} at {to12h(selected.time)}</span>
+          </p>
+        )}
+
+        {!canBook && (
+          <p className="mt-4 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
+            Only patient accounts can book appointments.
+          </p>
+        )}
+
+        <button type="button" onClick={book} disabled={!selected || booking || !canBook}
+                className="mt-4 rounded-lg bg-brand-600 px-5 py-2 font-medium text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50">
+          {booking ? "Holding slot..." : user ? "Hold this slot and continue" : "Log in to book"}
         </button>
 
         <h2 className="mt-8 text-sm font-semibold uppercase tracking-wide text-slate-500">Weekly schedule</h2>

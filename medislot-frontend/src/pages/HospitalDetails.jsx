@@ -89,14 +89,12 @@ export default function HospitalDetails() {
           >
             Find doctors here
           </Link>
-          <button
-            type="button"
-            disabled
-            title="Booking opens in Phase 5"
-            className="rounded-lg border border-slate-300 px-5 py-2 font-medium text-slate-400"
+          <Link
+            to={`/doctors?hospitalId=${h.id}`}
+            className="rounded-lg bg-brand-600 px-5 py-2 font-medium text-white hover:bg-brand-700"
           >
             Book Appointment
-          </button>
+          </Link>
           {canMap ? (
             <>
               <a

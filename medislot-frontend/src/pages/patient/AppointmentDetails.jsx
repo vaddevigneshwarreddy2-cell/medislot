@@ -1,0 +1,158 @@
+import { useEffect, useState } from "react";
+import { Link, Navigate, useLocation, useParams } from "react-router-dom";
+import { isCancel } from "axios";
+import { cancelAppointment, getAppointment } from "../../api/appointments";
+import { getApiError } from "../../api/errors";
+import StatusBadge from "../../components/StatusBadge";
+import CancelDialog from "../../components/CancelDialog";
+import { directionsUrl, hasCoordinates, viewLocationUrl } from "../../utils/maps";
+import { formatLong } from "../../utils/dates";
+import { ACTIVE_STATUSES, to12h } from "../../utils/format";
+
+export default function AppointmentDetails() {
+  const { appointmentId } = useParams();
+  const location = useLocation();
+  const [appt, setAppt] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showCancel, setShowCancel] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [cancelError, setCancelError] = useState(null);
+
+  useEffect(() => {
+    const c = new AbortController();
+    setLoading(true);
+    getAppointment(appointmentId, c.signal)
+      .then((a) => { setAppt(a); setLoading(false); })
+      .catch((err) => {
+        if (isCancel(err)) return;
+        setError(getApiError(err).message);
+        setLoading(false);
+      });
+    return () => c.abort();
+  }, [appointmentId]);
+
+  if (loading) return <p className="p-8 text-center text-slate-500">Loading...</p>;
+  if (error || !appt) {
+    return (
+      <section className="mx-auto max-w-xl px-4 py-16 text-center">
+        <p role="alert" className="text-lg text-slate-700">{error || "Appointment not found."}</p>
+        <Link to="/patient/appointments" className="mt-4 inline-block font-medium text-brand-600 hover:underline">
+          My appointments
+        </Link>
+      </section>
+    );
+  }
+  if (appt.status === "HELD") return <Navigate to={`/appointments/${appt.appointmentId}/confirm`} replace />;
+
+  const h = appt.hospital;
+  const active = ACTIVE_STATUSES.includes(appt.status);
+  const changeable = appt.status === "CONFIRMED" || appt.status === "ATTENDANCE_PENDING";
+  const banner = location.state?.justBooked
+    ? "Appointment Confirmed"
+    : location.state?.justRescheduled ? "Appointment Rescheduled" : null;
+
+  async function doCancel(reason) {
+    setBusy(true);
+    setCancelError(null);
+    try {
+      const updated = await cancelAppointment(appt.appointmentId, reason);
+      setAppt(updated);
+      setShowCancel(false);
+    } catch (err) {
+      setCancelError(getApiError(err).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="mx-auto max-w-2xl px-4 py-10">
+      <Link to="/patient/appointments" className="text-sm font-medium text-brand-600 hover:underline">
+        &larr; My appointments
+      </Link>
+
+      {banner && (
+        <p role="status" className="mt-4 rounded-lg bg-green-50 px-4 py-3 text-lg font-semibold text-green-700">
+          <span aria-hidden="true">&#10003;</span> {banner}
+        </p>
+      )}
+
+      <div className="mt-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">{appt.doctorName}</h1>
+            <p className="text-slate-600">{appt.specialization} &middot; {appt.department}</p>
+          </div>
+          <StatusBadge status={appt.status} />
+        </div>
+
+        {h && (
+          <p className="mt-4 text-slate-700">
+            <span aria-hidden="true">&#127973;</span> {h.name}
+            <span className="block text-sm text-slate-500"><span aria-hidden="true">&#128205;</span> {h.address}</span>
+          </p>
+        )}
+        <p className="mt-3 font-medium text-slate-800">
+          <span aria-hidden="true">&#128197;</span> {formatLong(appt.appointmentDate)}
+        </p>
+        <p className="font-medium text-slate-800">
+          <span aria-hidden="true">&#128336;</span> {to12h(appt.appointmentTime)} - {to12h(appt.endTime)}
+        </p>
+        {appt.reason && <p className="mt-3 text-sm text-slate-600">Reason: {appt.reason}</p>}
+        {appt.rescheduleCount > 0 && (
+          <p className="mt-1 text-xs text-slate-500">Rescheduled {appt.rescheduleCount} time(s).</p>
+        )}
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button type="button" disabled title="QR check-in arrives in Phase 6"
+                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-400">
+            View QR Code
+          </button>
+          {hasCoordinates(h) && (
+            <a href={viewLocationUrl(h)} target="_blank" rel="noopener noreferrer"
+               className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+              View Hospital Location
+            </a>
+          )}
+          {active && hasCoordinates(h) && (
+            <a href={directionsUrl(h)} target="_blank" rel="noopener noreferrer"
+               className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
+              <span aria-hidden="true">&#129517;</span> Get Directions in Google Maps
+            </a>
+          )}
+        </div>
+
+        {changeable && (
+          <div className="mt-4 flex flex-wrap gap-3 border-t border-slate-100 pt-4">
+            {appt.canReschedule ? (
+              <Link to={`/appointments/${appt.appointmentId}/reschedule`}
+                    className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-100">
+                Reschedule Appointment
+              </Link>
+            ) : (
+              <button type="button" disabled
+                      className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-400">
+                Reschedule Appointment
+              </button>
+            )}
+            <button type="button" onClick={() => { setCancelError(null); setShowCancel(true); }} disabled={!appt.canCancel}
+                    className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50">
+              Cancel Appointment
+            </button>
+            {(!appt.canCancel || !appt.canReschedule) && (
+              <p className="w-full text-xs text-slate-500">
+                Online changes are closed for this appointment (too close to the start time, or the reschedule limit was reached).
+                Please contact the hospital.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {showCancel && (
+        <CancelDialog busy={busy} error={cancelError} onClose={() => setShowCancel(false)} onConfirm={doCancel} />
+      )}
+    </section>
+  );
+}

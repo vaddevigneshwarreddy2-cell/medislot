@@ -24,6 +24,9 @@ export default function Navbar() {
           {user ? (
             <>
               <Link to={dashboardPath(user.role)} className="hover:text-brand-600">Dashboard</Link>
+              {user.role === "PATIENT" && (
+                <Link to="/patient/appointments" className="hover:text-brand-600">My appointments</Link>
+              )}
               <span className="hidden sm:inline text-slate-400">|</span>
               <span className="hidden sm:inline text-slate-700">{user.fullName}</span>
               <button

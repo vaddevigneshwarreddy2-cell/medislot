@@ -1,10 +1,16 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { dashboardPath } from "../auth/roles";
 import { getApiError } from "../api/errors";
 import AuthCard from "../components/AuthCard";
 import Field from "../components/Field";
+
+function destination(user, location) {
+  const from = location.state?.from;
+  if (from?.pathname && user.role === "PATIENT") return `${from.pathname}${from.search || ""}`;
+  return dashboardPath(user.role);
+}
 
 export default function Login() {
   const { user, login } = useAuth();
@@ -14,7 +20,7 @@ export default function Login() {
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  if (user) return <Navigate to={dashboardPath(user.role)} replace />;
+  if (user) return <Navigate to={destination(user, location)} replace />;
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -26,7 +32,7 @@ export default function Login() {
     setSubmitting(true);
     try {
       const u = await login(form.email.trim(), form.password);
-      navigate(dashboardPath(u.role), { replace: true });
+      navigate(destination(u, location), { replace: true });
     } catch (err) {
       const { code, message } = getApiError(err);
       if (code === "ACCOUNT_NOT_VERIFIED") {

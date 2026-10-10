@@ -357,7 +357,7 @@ public class AppointmentService {
                 d == null ? null : d.fullName(), d == null ? null : d.specialization(),
                 d == null ? null : d.departmentName(), info, a.getRescheduleCount(),
                 a.getRescheduledFromId(), a.getReason(), changeable,
-                changeable && a.getRescheduleCount() < maxReschedules);
+                changeable && a.getRescheduleCount() < maxReschedules, a.getDoctorId());
     }
 
     private String blankToNull(String s) {

@@ -36,6 +36,9 @@ public class ScheduleService {
     private final DoctorLeaveRepository leave;
     private final HospitalHolidayRepository holidays;
     private final AuditService audit;
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.context.ApplicationEventPublisher events;
+
     private final ZoneId zone;
 
     public ScheduleService(DoctorAccess access, AdminScope scope, DoctorAvailabilityRepository availability,
@@ -102,7 +105,7 @@ public class ScheduleService {
         l.setReason(blankToNull(r.reason()));
         l.setCreatedBy(actor.id());
         l = leave.save(l);
-        // Phase 5: existing appointments on this date will be flagged for reschedule/cancel here.
+        events.publishEvent(new com.medislot.event.LeaveCreated(d.getId(), l.getLeaveDate())); // patients are told after the transaction commits
         audit.log(actor.id(), actor.email(), "LEAVE_CREATED", "DOCTOR", String.valueOf(d.getId()),
                 "date=" + l.getLeaveDate(), null);
         return new LeaveResponse(l.getId(), l.getLeaveDate(), l.getReason());

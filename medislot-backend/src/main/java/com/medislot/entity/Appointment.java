@@ -77,6 +77,22 @@ public class Appointment extends BaseEntity {
     @Column(name = "completed_at")
     private Instant completedAt;
 
+    @Column(name = "attendance_requested_at")
+    private Instant attendanceRequestedAt;
+
+    @Column(name = "attendance_confirmed_at")
+    private Instant attendanceConfirmedAt;
+
+    @Column(name = "reminder_sent_at")
+    private Instant reminderSentAt;
+
+    public Instant getAttendanceRequestedAt() { return attendanceRequestedAt; }
+    public void setAttendanceRequestedAt(Instant attendanceRequestedAt) { this.attendanceRequestedAt = attendanceRequestedAt; }
+    public Instant getAttendanceConfirmedAt() { return attendanceConfirmedAt; }
+    public void setAttendanceConfirmedAt(Instant attendanceConfirmedAt) { this.attendanceConfirmedAt = attendanceConfirmedAt; }
+    public Instant getReminderSentAt() { return reminderSentAt; }
+    public void setReminderSentAt(Instant reminderSentAt) { this.reminderSentAt = reminderSentAt; }
+
     public Integer getQueueNumber() { return queueNumber; }
     public void setQueueNumber(Integer queueNumber) { this.queueNumber = queueNumber; }
     public Instant getCheckedInAt() { return checkedInAt; }

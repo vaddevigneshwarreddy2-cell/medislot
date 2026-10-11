@@ -37,11 +37,19 @@ public class AuditLog {
     private Instant createdAt = Instant.now();
 
     public Long getId() { return id; }
+    public Long getActorUserId() { return actorUserId; }
     public void setActorUserId(Long actorUserId) { this.actorUserId = actorUserId; }
+    public String getActorEmail() { return actorEmail; }
     public void setActorEmail(String actorEmail) { this.actorEmail = actorEmail; }
+    public String getAction() { return action; }
     public void setAction(String action) { this.action = action; }
+    public String getResourceType() { return resourceType; }
     public void setResourceType(String resourceType) { this.resourceType = resourceType; }
+    public String getResourceId() { return resourceId; }
     public void setResourceId(String resourceId) { this.resourceId = resourceId; }
+    public String getMetadata() { return metadata; }
     public void setMetadata(String metadata) { this.metadata = metadata; }
+    public String getIpAddress() { return ipAddress; }
     public void setIpAddress(String ipAddress) { this.ipAddress = ipAddress; }
+    public Instant getCreatedAt() { return createdAt; }
 }

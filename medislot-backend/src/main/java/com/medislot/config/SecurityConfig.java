@@ -77,7 +77,10 @@ public class SecurityConfig {
                             "You do not have permission to perform this action.")))
             .headers(h -> h
                 .contentTypeOptions(Customizer.withDefaults())
-                .frameOptions(f -> f.deny()));
+                .frameOptions(f -> f.deny())
+                .referrerPolicy(r -> r.policy(org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))
+                .contentSecurityPolicy(c -> c.policyDirectives("default-src 'none'; frame-ancestors 'none'"))
+                .httpStrictTransportSecurity(s -> s.includeSubDomains(true).maxAgeInSeconds(31536000)));
         return http.build();
     }
 

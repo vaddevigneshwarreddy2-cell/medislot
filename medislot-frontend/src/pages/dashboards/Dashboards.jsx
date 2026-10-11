@@ -190,6 +190,7 @@ export function AdminDashboard() {
         { label: "Doctors", note: "Add doctors, set schedules and leave", to: "/admin/doctors" },
         { label: "Departments", note: "Manage departments", to: "/admin/departments" },
         { label: "Holidays", note: "Days the hospital is closed", to: "/admin/holidays" },
+        { label: "Reports", note: "Charts, rates, waiting time, CSV", to: "/admin/reports" },
       ]} />
     </Layout>
   );

@@ -19,6 +19,7 @@ import AdminDoctors from "./pages/admin/AdminDoctors";
 import AdminDoctorSchedule from "./pages/admin/AdminDoctorSchedule";
 import AdminDepartments from "./pages/admin/AdminDepartments";
 import AdminHolidays from "./pages/admin/AdminHolidays";
+import AdminReports from "./pages/admin/AdminReports";
 import MyAppointments from "./pages/patient/MyAppointments";
 import AppointmentDetails from "./pages/patient/AppointmentDetails";
 import AppointmentQr from "./pages/patient/AppointmentQr";
@@ -92,6 +93,7 @@ export default function App() {
           <Route path="/admin/doctors/:doctorId/schedule" element={guard(HOSPITAL_ADMIN_ONLY, <AdminDoctorSchedule />)} />
           <Route path="/admin/departments" element={guard(HOSPITAL_ADMIN_ONLY, <AdminDepartments />)} />
           <Route path="/admin/holidays" element={guard(HOSPITAL_ADMIN_ONLY, <AdminHolidays />)} />
+          <Route path="/admin/reports" element={guard(HOSPITAL_ADMIN_ONLY, <AdminReports />)} />
 
           <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
 

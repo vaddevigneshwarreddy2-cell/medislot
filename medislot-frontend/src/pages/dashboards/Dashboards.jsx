@@ -164,6 +164,7 @@ function StatTable({ title, rows }) {
 export function AdminDashboard() {
   const [period, setPeriod] = useState("today");
   const { data: d, error } = useLoad(`/admin/dashboard?period=${period}`);
+  const { data: hosp } = useLoad("/admin/hospital");
   const tab = (value, label) => (
     <button type="button" onClick={() => setPeriod(value)} aria-pressed={period === value}
             className={`rounded-full border px-4 py-1.5 text-sm font-medium ${
@@ -172,7 +173,7 @@ export function AdminDashboard() {
     </button>
   );
   return (
-    <Layout title="Hospital admin dashboard" error={error}>
+    <Layout title={hosp ? `${hosp.name} - admin dashboard` : "Hospital admin dashboard"} error={error}>
       <div className="mt-4 flex gap-2" role="group" aria-label="Period">
         {tab("today", "Today")}{tab("week", "Last 7 days")}{tab("month", "Last 30 days")}
       </div>
@@ -191,6 +192,8 @@ export function AdminDashboard() {
         { label: "Departments", note: "Manage departments", to: "/admin/departments" },
         { label: "Holidays", note: "Days the hospital is closed", to: "/admin/holidays" },
         { label: "Reports", note: "Charts, rates, waiting time, CSV", to: "/admin/reports" },
+        { label: "Receptionists", note: "Add and manage front-desk staff", to: "/admin/staff" },
+        { label: "Hospital profile and location", note: "Name, address and map position", to: "/admin/hospital" },
       ]} />
     </Layout>
   );

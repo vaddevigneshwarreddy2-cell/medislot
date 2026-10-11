@@ -1,4 +1,4 @@
-﻿export const ROLES = {
+export const ROLES = {
   PATIENT: "PATIENT",
   DOCTOR: "DOCTOR",
   RECEPTIONIST: "RECEPTIONIST",
@@ -11,8 +11,8 @@ export function dashboardPath(role) {
     case ROLES.PATIENT: return "/patient";
     case ROLES.DOCTOR: return "/doctor";
     case ROLES.RECEPTIONIST: return "/reception";
-    case ROLES.HOSPITAL_ADMIN:
-    case ROLES.SUPER_ADMIN: return "/admin";
+    case ROLES.HOSPITAL_ADMIN: return "/admin";
+    case ROLES.SUPER_ADMIN: return "/super-admin";
     default: return "/";
   }
 }

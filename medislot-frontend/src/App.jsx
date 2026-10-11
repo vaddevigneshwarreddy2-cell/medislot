@@ -20,6 +20,9 @@ import AdminDoctorSchedule from "./pages/admin/AdminDoctorSchedule";
 import AdminDepartments from "./pages/admin/AdminDepartments";
 import AdminHolidays from "./pages/admin/AdminHolidays";
 import AdminReports from "./pages/admin/AdminReports";
+import AdminStaff from "./pages/admin/AdminStaff";
+import AdminHospital from "./pages/admin/AdminHospital";
+import SuperAdmin from "./pages/SuperAdmin";
 import MyAppointments from "./pages/patient/MyAppointments";
 import AppointmentDetails from "./pages/patient/AppointmentDetails";
 import AppointmentQr from "./pages/patient/AppointmentQr";
@@ -88,12 +91,15 @@ export default function App() {
           <Route path="/reception/walk-in" element={guard(RECEPTION_ONLY, <WalkIn />)} />
           <Route path="/reception/appointments" element={guard(RECEPTION_ONLY, <ReceptionAppointments />)} />
 
-          <Route path="/admin" element={guard([ROLES.HOSPITAL_ADMIN, ROLES.SUPER_ADMIN], <AdminDashboard />)} />
+          <Route path="/admin" element={guard(HOSPITAL_ADMIN_ONLY, <AdminDashboard />)} />
           <Route path="/admin/doctors" element={guard(HOSPITAL_ADMIN_ONLY, <AdminDoctors />)} />
           <Route path="/admin/doctors/:doctorId/schedule" element={guard(HOSPITAL_ADMIN_ONLY, <AdminDoctorSchedule />)} />
           <Route path="/admin/departments" element={guard(HOSPITAL_ADMIN_ONLY, <AdminDepartments />)} />
           <Route path="/admin/holidays" element={guard(HOSPITAL_ADMIN_ONLY, <AdminHolidays />)} />
           <Route path="/admin/reports" element={guard(HOSPITAL_ADMIN_ONLY, <AdminReports />)} />
+          <Route path="/admin/staff" element={guard(HOSPITAL_ADMIN_ONLY, <AdminStaff />)} />
+          <Route path="/admin/hospital" element={guard(HOSPITAL_ADMIN_ONLY, <AdminHospital />)} />
+          <Route path="/super-admin" element={guard([ROLES.SUPER_ADMIN], <SuperAdmin />)} />
 
           <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
 

@@ -36,7 +36,10 @@ public class AuthServiceImpl implements AuthService {
     private final OtpSender otpSender;
     private final AuditService audit;
     private final AppProperties props;
-    private final String dummyHash; // equalises timing for unknown emails
+    private final String dummyHash;
+
+    @org.springframework.beans.factory.annotation.Value("${REQUIRE_VERIFICATION:true}")
+    private boolean requireVerification; // equalises timing for unknown emails
 
     public AuthServiceImpl(UserRepository users, PatientRepository patients,
                            VerificationCodeRepository codes, RefreshTokenRepository refreshTokens,
@@ -77,6 +80,7 @@ public class AuthServiceImpl implements AuthService {
         user.setFullName(req.fullName().trim());
         user.setPasswordHash(encoder.encode(req.password()));
         user.setRole(Role.PATIENT);
+        user.setVerified(!requireVerification);
         try {
             user = users.save(user);
         } catch (DataIntegrityViolationException e) { // lost a race with another registration
@@ -90,7 +94,7 @@ public class AuthServiceImpl implements AuthService {
 
         issueCode(user);
         audit.log(user.getId(), email, "REGISTER", "USER", String.valueOf(user.getId()), null, ip);
-        return new RegisterResponse(email, true);
+        return new RegisterResponse(email, requireVerification);
     }
 
     // ---------- verification ----------
@@ -231,6 +235,7 @@ public class AuthServiceImpl implements AuthService {
     // ---------- helpers ----------
 
     private void issueCode(User user) {
+        if (!requireVerification) return;
         codes.invalidateAll(user.getId());
         String code = String.format("%06d", RANDOM.nextInt(1_000_000));
         VerificationCode vc = new VerificationCode();

@@ -25,6 +25,7 @@ import AppointmentQr from "./pages/patient/AppointmentQr";
 import BookingConfirm from "./pages/patient/BookingConfirm";
 import Reschedule from "./pages/patient/Reschedule";
 import FollowUps from "./pages/patient/FollowUps";
+import Notifications from "./pages/Notifications";
 import PrescriptionList from "./pages/clinical/PrescriptionList";
 import PrescriptionDetailPage from "./pages/clinical/PrescriptionDetailPage";
 import ReceptionHome from "./pages/reception/ReceptionHome";
@@ -91,6 +92,8 @@ export default function App() {
           <Route path="/admin/doctors/:doctorId/schedule" element={guard(HOSPITAL_ADMIN_ONLY, <AdminDoctorSchedule />)} />
           <Route path="/admin/departments" element={guard(HOSPITAL_ADMIN_ONLY, <AdminDepartments />)} />
           <Route path="/admin/holidays" element={guard(HOSPITAL_ADMIN_ONLY, <AdminHolidays />)} />
+
+          <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>

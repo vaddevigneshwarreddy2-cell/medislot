@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { dashboardPath } from "../auth/roles";
+import NotificationBell from "./NotificationBell";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -30,6 +31,7 @@ export default function Navbar() {
                   <Link to="/patient/prescriptions" className="hover:text-brand-600">Prescriptions</Link>
                 </>
               )}
+              <NotificationBell />
               <span className="hidden sm:inline text-slate-400">|</span>
               <span className="hidden sm:inline text-slate-700">{user.fullName}</span>
               <button

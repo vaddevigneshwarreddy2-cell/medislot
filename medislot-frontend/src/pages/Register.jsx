@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { getApiError } from "../api/errors";
@@ -43,7 +43,7 @@ export default function Register() {
         mobile: form.mobile.trim(),
         password: form.password,
       });
-      navigate("/verify", { state: { email: form.email.trim().toLowerCase() } });
+      navigate("/login", { state: { message: "Account created. Please log in." } });
     } catch (err) {
       setServerError(getApiError(err).message);
     } finally {

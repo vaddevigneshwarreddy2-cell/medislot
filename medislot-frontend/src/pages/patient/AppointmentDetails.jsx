@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate, useLocation, useParams } from "react-router-dom";
 import { isCancel } from "axios";
 import { cancelAppointment, getAppointment } from "../../api/appointments";
+import { confirmAttendance } from "../../api/notifications";
 import { getApiError } from "../../api/errors";
 import StatusBadge from "../../components/StatusBadge";
 import CancelDialog from "../../components/CancelDialog";
@@ -19,18 +20,26 @@ export default function AppointmentDetails() {
   const [showCancel, setShowCancel] = useState(false);
   const [busy, setBusy] = useState(false);
   const [cancelError, setCancelError] = useState(null);
+  const [attendError, setAttendError] = useState(null);
+  const [attendMsg, setAttendMsg] = useState(null);
+
+  async function load(signal) {
+    try {
+      setAppt(await getAppointment(appointmentId, signal));
+    } catch (err) {
+      if (isCancel(err)) return;
+      setError(getApiError(err).message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     const c = new AbortController();
     setLoading(true);
-    getAppointment(appointmentId, c.signal)
-      .then((a) => { setAppt(a); setLoading(false); })
-      .catch((err) => {
-        if (isCancel(err)) return;
-        setError(getApiError(err).message);
-        setLoading(false);
-      });
+    load(c.signal);
     return () => c.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appointmentId]);
 
   if (loading) return <p className="p-8 text-center text-slate-500">Loading...</p>;
@@ -68,6 +77,20 @@ export default function AppointmentDetails() {
     }
   }
 
+  async function attend() {
+    setBusy(true);
+    setAttendError(null);
+    try {
+      await confirmAttendance(appt.appointmentId);
+      setAttendMsg("Thanks, your attendance is confirmed.");
+      await load();
+    } catch (err) {
+      setAttendError(getApiError(err).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <section className="mx-auto max-w-2xl px-4 py-10">
       <Link to="/patient/appointments" className="text-sm font-medium text-brand-600 hover:underline">
@@ -78,6 +101,31 @@ export default function AppointmentDetails() {
         <p role="status" className="mt-4 rounded-lg bg-green-50 px-4 py-3 text-lg font-semibold text-green-700">
           <span aria-hidden="true">&#10003;</span> {banner}
         </p>
+      )}
+
+      {appt.status === "ATTENDANCE_PENDING" && (
+        <div role="alert" className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4">
+          <p className="font-semibold text-amber-900">Please confirm that you will attend.</p>
+          <p className="mt-1 text-sm text-amber-800">
+            Confirming helps the hospital plan the day. If you can't come, cancel so someone else can use the slot.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-3">
+            <button type="button" onClick={attend} disabled={busy}
+                    className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-60">
+              Yes, I will attend
+            </button>
+            {appt.canCancel && (
+              <button type="button" onClick={() => { setCancelError(null); setShowCancel(true); }} disabled={busy}
+                      className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60">
+                Cancel appointment
+              </button>
+            )}
+          </div>
+          {attendError && <p className="mt-2 text-sm text-red-700">{attendError}</p>}
+        </div>
+      )}
+      {attendMsg && (
+        <p role="status" className="mt-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">{attendMsg}</p>
       )}
 
       <div className="mt-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">

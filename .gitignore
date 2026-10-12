@@ -17,3 +17,6 @@ dist/
 .vscode/
 *.iml
 .DS_Store
+run.log
+*.pdf
+report.csv

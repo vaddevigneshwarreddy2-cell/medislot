@@ -1,0 +1,8 @@
+target/
+.env
+*.env
+run.log
+*.pdf
+*.csv
+.idea/
+.vscode/

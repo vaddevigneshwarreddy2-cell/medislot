@@ -1,0 +1,16 @@
+# Loaded only with SPRING_PROFILES_ACTIVE=prod.
+server:
+  error:
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never
+
+spring:
+  jpa:
+    show-sql: false
+
+logging:
+  level:
+    root: INFO
+    org.hibernate.SQL: WARN
+    com.medislot: INFO
